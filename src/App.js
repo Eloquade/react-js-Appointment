@@ -1,39 +1,65 @@
-import { BiArchive ,BiTrash} from "react-icons/bi";
+import {useState, useEffect, useCallback} from 'react';
+import {BiArchive} from 'react-icons/bi';
+import Search from './components/Search';
+import AddAppointment from './components/AddAppointment';
+import AppointmentInfo from './components/AppointmentInfo';
 import './App.css';
-import Search from './components/search';
-import Addappointment from './components/addappointment';
-import Appointmentlist from './data.json';
-import Appointmentinfo from "./components/appointmentinfo";
-
-import { BsFillAwardFill } from "react-icons/bs";
 
 function App() {
+  let [appointmentList, setAppointmentList] = useState([]);
+  let [query, setQuery] = useState('');
+  let [sortBy, setSortBy] = useState("petName");
+  let [orderBy, setOrderBy] = useState("asc");
+
+  const filteredAppointment = appointmentList.filter(
+    item => {
+      return (
+        item.petName.toLowerCase().includes(query.toLowerCase()) ||
+        item.ownerName.toLowerCase().includes(query.toLowerCase()) ||
+        item.aptNotes.toLowerCase().includes(query.toLowerCase())
+      )
+    }
+  ).sort((a, b) => {
+    let order = (orderBy === "asc") ? 1 : -1;
+    return (
+      a[sortBy].toLowerCase() < b[sortBy].toLowerCase() ? -1 * order : 1 * order
+    )
+  })
+
+  const fetchData = useCallback(() => {
+    fetch('./data.json')
+      .then(response => response.json())
+      .then(data => {
+        setAppointmentList(data)
+      });
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
   return (
     <div className="App container mx-auto mt-3 font-thin">
-      <h1 class="text-4xl">
-        <BiArchive className="inline-block text-red-400 align top"/>Appointment</h1>
-      <Addappointment />
-      <Search />
+      <h1 className="text-4xl">
+        <BiArchive className="inline-block text-red-400 align-top" />Your Appointments
+        </h1>
+        <AddAppointment />
+        <Search query={query} onQueryChange={myQuery => setQuery(myQuery)}
+        orderBy={orderBy}
+        onOrderByChange={mySort => setOrderBy(mySort)}
+        sortBy={sortBy}
+        onSortByChange={mySort => setSortBy(mySort)}
+        />
 
-      <ul className="divide-y divide-gray-200">
-        {Appointmentlist
+        <ul className="divide-y divide-gray-200">
+        {filteredAppointment
           .map(appointment => (
-            <li className="px-3 py-3 flex items-start">
-              <button type="button"
-                className="p-1.5 mr-1.5 mt-1 rounded text-white bg-red-500 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <BiTrash /></button>
-              <div className="flex-grow">
-                <div className="flex items-center">
-                  <span className="flex-none font-medium text-2xl text-blue-500">{appointment.petName}</span>
-                  <span className="flex-grow text-right">{appointment.aptDate}</span>
-                </div>
-                <div><b className="font-bold text-blue-500">Owner:</b> {appointment.ownerName}</div>
-                <div className="leading-tight">{appointment.aptNotes}</div>
-              </div>
-            </li>
+            <AppointmentInfo key={appointment.id} appointment={appointment} 
+            onDeleteAppointment={
+              appointmentId => setAppointmentList(appointmentList.filter(appointment => appointment.id !== appointmentId))
+            }/>
           ))}
         </ul>
-
     </div>
   );
 }
