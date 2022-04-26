@@ -1,28 +1,32 @@
-import {useState, useEffect, useCallback} from 'react';
-import {BiArchive} from 'react-icons/bi';
-import Search from './components/Search';
-import AddAppointment from './components/AddAppointment';
-import AppointmentInfo from './components/AppointmentInfo';
+import { BiArchive} from "react-icons/bi";
 import './App.css';
+import Search from './components/search';
+import Addappointment from './components/addappointment';
+import Appointmentinfo from "./components/appointmentinfo";
+import { useCallback,useState , useEffect } from "react";
+
+// import { BsFillAwardFill } from "react-icons/bs";
 
 function App() {
-  let [appointmentList, setAppointmentList] = useState([]);
+  let [Appointmentlist, setAppointmentList] = useState([]);
   let [query, setQuery] = useState('');
   let [sortBy, setSortBy] = useState("petName");
   let [orderBy, setOrderBy] = useState("asc");
 
-  const filteredAppointment = appointmentList.filter(
+  const filteredAppointment = Appointmentlist.filter(
     item => {
       return (
         item.petName.toLowerCase().includes(query.toLowerCase()) ||
         item.ownerName.toLowerCase().includes(query.toLowerCase()) ||
         item.aptNotes.toLowerCase().includes(query.toLowerCase())
+
       )
     }
-  ).sort((a, b) => {
+  ).sort((a, b)=> {
     let order = (orderBy === "asc") ? 1 : -1;
     return (
-      a[sortBy].toLowerCase() < b[sortBy].toLowerCase() ? -1 * order : 1 * order
+      a[sortBy].toLowerCase() < b[sortBy].toLowerCase() ? -1 * order
+      : 1 * order
     )
   })
 
@@ -35,31 +39,29 @@ function App() {
   }, [])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+      fetchData()
+
+  },[fetchData]);
 
   return (
     <div className="App container mx-auto mt-3 font-thin">
       <h1 className="text-4xl">
-        <BiArchive className="inline-block text-red-400 align-top" />Your Appointments
-        </h1>
-        <AddAppointment />
-        <Search query={query} onQueryChange={myQuery => setQuery(myQuery)}
-        orderBy={orderBy}
-        onOrderByChange={mySort => setOrderBy(mySort)}
-        sortBy={sortBy}
-        onSortByChange={mySort => setSortBy(mySort)}
-        />
+        <BiArchive className="inline-block text-red-400 align top"/>Appointment</h1>
+      <Addappointment />
+      <Search query={query} onQueryChange={myQuery => setQuery(myQuery)}
+        orderBy= {orderBy}
+      />
 
-        <ul className="divide-y divide-gray-200">
+      <ul className="divide-y divide-gray-200">
         {filteredAppointment
           .map(appointment => (
-            <AppointmentInfo key={appointment.id} appointment={appointment} 
-            onDeleteAppointment={
-              appointmentId => setAppointmentList(appointmentList.filter(appointment => appointment.id !== appointmentId))
-            }/>
+            <Appointmentinfo key={appointment.id} appointment={appointment}
+              onDeleteAppointment={
+                appointmentid => setAppointmentList(Appointmentlist.filter(appointment => appointment.id !== appointmentid))
+              }/>
           ))}
         </ul>
+
     </div>
   );
 }
